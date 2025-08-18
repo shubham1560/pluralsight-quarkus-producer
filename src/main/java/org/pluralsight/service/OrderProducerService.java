@@ -22,32 +22,32 @@ public class OrderProducerService {
     @Inject
     @Channel("order-initiated")
     Emitter<String> orderInitiatedEmitter;
-    
+
+    @Inject
+    OrderTransformationService orderTransformationService;
+
     public OrderInitiated initiateOrder(OrderRequest orderRequest) {
-        OrderInitiated order = new OrderInitiated();
-        order.setOrderId(orderRequest.getOrderId());
-        order.setCustomerName(orderRequest.getCustomerName());
-        order.setProductName(orderRequest.getProductName());
-        order.setQuantity(orderRequest.getQuantity());
-        order.setTotalAmount(orderRequest.getTotalAmount());
-        
-        LOG.infof("Initiating new order: %s", order);
-        
+        LOG.infof("Initiating new order: %s", orderRequest);
+
+        OrderInitiated transformedOrder = orderTransformationService.transformOrder(orderRequest);
+
+        LOG.infof("Order initiated: %s", transformedOrder);
+
         // Convert order to JSON string and send to Kafka
         try {
-            String orderJson = objectWriter.writeValueAsString(order);
+            String orderJson = objectWriter.writeValueAsString(transformedOrder);
             orderInitiatedEmitter.send(orderJson)
                 .whenComplete((success, failure) -> {
                     if (failure != null) {
-                        LOG.errorf(failure, "Failed to send order initiated event to Kafka: %s", order.getOrderId());
+                        LOG.errorf(failure, "Failed to send order initiated event to Kafka: %s", transformedOrder.getOrderId());
                     } else {
-                        LOG.infof("Successfully sent order initiated event to Kafka: %s", order.getOrderId());
+                        LOG.infof("Successfully sent order initiated event to Kafka: %s", transformedOrder.getOrderId());
                     }
                 });
         } catch (Exception e) {
-            LOG.errorf(e, "Failed to serialize order to JSON: %s", order.getOrderId());
+            LOG.errorf(e, "Failed to serialize order to JSON: %s", transformedOrder.getOrderId());
         }
-        
-        return order;
+
+        return transformedOrder;
     }
 }

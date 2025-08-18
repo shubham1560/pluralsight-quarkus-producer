@@ -11,6 +11,9 @@ public class OrderInitiated {
     private double totalAmount;
     private LocalDateTime orderDate;
     private String status;
+    
+    private String deliveryType;
+    private String liveInventoryCheck; 
 
     public OrderInitiated() {
         this.orderId = UUID.randomUUID().toString();
@@ -83,6 +86,22 @@ public class OrderInitiated {
         this.status = status;
     }
 
+    public String getDeliveryType() {
+        return deliveryType;
+    }
+
+    public void setDeliveryType(String deliveryType) {
+        this.deliveryType = deliveryType;
+    }
+
+    public String getLiveInventoryCheck() {
+        return liveInventoryCheck;
+    }
+
+    public void setLiveInventoryCheck(String liveInventoryCheck) {
+        this.liveInventoryCheck = liveInventoryCheck;
+    }
+
     @Override
     public String toString() {
         return "OrderInitiated{" +
@@ -93,6 +112,8 @@ public class OrderInitiated {
                 ", totalAmount=" + totalAmount +
                 ", orderDate=" + orderDate +
                 ", status='" + status + '\'' +
+                ", deliveryType='" + deliveryType + '\'' +
+                ", liveInventoryCheck='" + liveInventoryCheck + '\'' +
                 '}';
     }
 }
