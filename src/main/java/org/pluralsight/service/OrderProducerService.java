@@ -1,9 +1,6 @@
 package org.pluralsight.service;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-import org.eclipse.microprofile.reactive.messaging.Channel;
-import org.eclipse.microprofile.reactive.messaging.Emitter;
 import org.pluralsight.model.OrderInitiated;
 import org.pluralsight.dto.OrderRequest;
 import org.jboss.logging.Logger;
@@ -19,31 +16,18 @@ public class OrderProducerService {
         .registerModule(new JavaTimeModule())
         .writer();
     
-    @Inject
-    @Channel("order-initiated")
-    Emitter<String> orderInitiatedEmitter;
+    private final OrderTransformationService orderTransformationService;
 
-    @Inject
-    OrderTransformationService orderTransformationService;
+    public OrderProducerService() {
+        this.orderTransformationService = new OrderTransformationService();
+    }
 
     public OrderInitiated initiateOrder(OrderRequest orderRequest) {
-        LOG.infof("Initiating new order: %s", orderRequest);
-
         OrderInitiated transformedOrder = orderTransformationService.transformOrder(orderRequest);
 
-        LOG.infof("Order initiated: %s", transformedOrder);
-
-        // Convert order to JSON string and send to Kafka
-        try {
+         try {
             String orderJson = objectWriter.writeValueAsString(transformedOrder);
-            orderInitiatedEmitter.send(orderJson)
-                .whenComplete((success, failure) -> {
-                    if (failure != null) {
-                        LOG.errorf(failure, "Failed to send order initiated event to Kafka: %s", transformedOrder.getOrderId());
-                    } else {
-                        LOG.infof("Successfully sent order initiated event to Kafka: %s", transformedOrder.getOrderId());
-                    }
-                });
+            LOG.infof("Order would be sent to Kafka: %s", orderJson);
         } catch (Exception e) {
             LOG.errorf(e, "Failed to serialize order to JSON: %s", transformedOrder.getOrderId());
         }

@@ -15,9 +15,12 @@ public class OrderProducerResource {
     
     private static final Logger LOG = Logger.getLogger(OrderProducerResource.class);
     
-    @Inject
-    OrderProducerService orderProducerService;
-    
+    private final OrderProducerService orderProducerService;
+
+    public OrderProducerResource() {
+        this.orderProducerService = new OrderProducerService();
+    }
+
     @POST
     @Path("/initiate")
     @Consumes(MediaType.APPLICATION_JSON)
