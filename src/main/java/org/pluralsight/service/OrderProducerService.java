@@ -11,7 +11,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
-@ApplicationScoped
 public class OrderProducerService {
     
     private static final Logger LOG = Logger.getLogger(OrderProducerService.class);
@@ -19,12 +18,11 @@ public class OrderProducerService {
         .registerModule(new JavaTimeModule())
         .writer();
     
-    @Inject
-    @Channel("order-initiated")
-    Emitter<String> orderInitiatedEmitter;
+    private final OrderTransformationService orderTransformationService;
 
-    @Inject
-    OrderTransformationService orderTransformationService;
+    public OrderProducerService() {
+        this.orderTransformationService = new OrderTransformationService();
+    }
 
     public OrderInitiated initiateOrder(OrderRequest orderRequest) {
         LOG.infof("Initiating new order: %s", orderRequest);
@@ -33,7 +31,9 @@ public class OrderProducerService {
 
         LOG.infof("Order initiated: %s", transformedOrder);
 
-        // Convert order to JSON string and send to Kafka
+        // TODO: Convert order to JSON string and send to Kafka
+        // Commented out for Lambda deployment without Kafka
+        /*
         try {
             String orderJson = objectWriter.writeValueAsString(transformedOrder);
             orderInitiatedEmitter.send(orderJson)
@@ -44,6 +44,15 @@ public class OrderProducerService {
                         LOG.infof("Successfully sent order initiated event to Kafka: %s", transformedOrder.getOrderId());
                     }
                 });
+        } catch (Exception e) {
+            LOG.errorf(e, "Failed to serialize order to JSON: %s", transformedOrder.getOrderId());
+        }
+        */
+        
+        // For now, just log the order that would be sent to Kafka
+        try {
+            String orderJson = objectWriter.writeValueAsString(transformedOrder);
+            LOG.infof("Order would be sent to Kafka: %s", orderJson);
         } catch (Exception e) {
             LOG.errorf(e, "Failed to serialize order to JSON: %s", transformedOrder.getOrderId());
         }
