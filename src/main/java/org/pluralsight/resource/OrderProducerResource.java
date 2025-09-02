@@ -15,11 +15,8 @@ public class OrderProducerResource {
     
     private static final Logger LOG = Logger.getLogger(OrderProducerResource.class);
     
-    private final OrderProducerService orderProducerService;
-    
-    public OrderProducerResource() {
-        this.orderProducerService = new OrderProducerService();
-    }
+    @Inject
+    private OrderProducerService orderProducerService;
     
     @POST
     @Path("/initiate")
