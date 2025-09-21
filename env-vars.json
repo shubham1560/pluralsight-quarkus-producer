@@ -1,0 +1,5 @@
+{
+  "Variables": {
+    "MSK_BROKERS": "boot-zosnm4je.c3.kafka-serverless.ap-south-1.amazonaws.com:9098"
+  }
+}

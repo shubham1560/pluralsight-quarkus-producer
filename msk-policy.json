@@ -1,0 +1,39 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "kafka-cluster:Connect",
+        "kafka-cluster:AlterCluster",
+        "kafka-cluster:DescribeCluster"
+      ],
+      "Resource": "arn:aws:kafka:ap-south-1:494077377285:cluster/demo-cluster-1/429c9e01-d348-4915-9f94-e8b827997c9f-s3"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "kafka-cluster:DescribeTopic",
+        "kafka-cluster:CreateTopic",
+        "kafka-cluster:WriteData",
+        "kafka-cluster:ReadData"
+      ],
+      "Resource": "arn:aws:kafka:ap-south-1:494077377285:topic/demo-cluster-1/429c9e01-d348-4915-9f94-e8b827997c9f-s3/order-initiated"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "kafka-cluster:WriteData"
+      ],
+      "Resource": "arn:aws:kafka:ap-south-1:494077377285:topic/demo-cluster-1/429c9e01-d348-4915-9f94-e8b827997c9f-s3/*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "kafka-cluster:AlterGroup",
+        "kafka-cluster:DescribeGroup"
+      ],
+      "Resource": "arn:aws:kafka:ap-south-1:494077377285:group/demo-cluster-1/429c9e01-d348-4915-9f94-e8b827997c9f-s3/order-producer-group"
+    }
+  ]
+}
