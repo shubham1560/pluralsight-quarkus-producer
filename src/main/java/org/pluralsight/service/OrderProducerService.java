@@ -11,6 +11,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.Map;
+
 @ApplicationScoped
 public class OrderProducerService {
     
@@ -18,6 +21,9 @@ public class OrderProducerService {
     private static final ObjectWriter objectWriter = new ObjectMapper()
         .registerModule(new JavaTimeModule())
         .writer();
+    
+    // Simple in-memory cache for idempotency
+    private final Map<String, OrderInitiated> orderCache = new ConcurrentHashMap<>();
     
     @Inject
     @Channel("order-initiated")
@@ -27,10 +33,22 @@ public class OrderProducerService {
     OrderTransformationService orderTransformationService;
 
     public OrderInitiated initiateOrder(OrderRequest orderRequest) {
+        String orderId = orderRequest.getOrderId();
+        
+        // Check if order already processed (idempotency)
+        OrderInitiated cachedOrder = orderCache.get(orderId);
+        if (cachedOrder != null) {
+            LOG.infof("Order %s already processed - returning cached result", orderId);
+            return cachedOrder;
+        }
+        
+        // Process new order
         LOG.infof("Initiating new order: %s", orderRequest);
-
         OrderInitiated transformedOrder = orderTransformationService.transformOrder(orderRequest);
-
+        
+        // Store in cache for idempotency
+        orderCache.put(orderId, transformedOrder);
+        
         LOG.infof("Order initiated: %s", transformedOrder);
 
         // Convert order to JSON string and send to Kafka
